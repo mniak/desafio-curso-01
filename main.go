@@ -31,15 +31,15 @@ func check(wg *sync.WaitGroup, s site, prod bool) {
 		Get(s.url(prod))
 
 	if err != nil {
-		fmt.Printf("Erro ao testar site  %v: %v\n", s.Name, err)
+		log.Printf("Erro ao testar site  %v: %v\n", s.Name, err)
 		return
 	}
 
 	result := resp.Result().(*hcResult)
 	if result.IsHealthy {
-		fmt.Printf("%v está saudável\n", s.Name)
+		log.Printf("%v está saudável\n", s.Name)
 	} else {
-		fmt.Printf("%v está com erro\n", s.Name)
+		log.Printf("%v está com erro\n", s.Name)
 	}
 }
 
@@ -56,7 +56,7 @@ func determineIfProd(flagSbox, flagProd bool) bool {
 	n, _, err := prompt.Run()
 	log.Println(n)
 	if err != nil {
-		fmt.Printf("Erro na leitura %v. Usando sandbox\n", err)
+		log.Printf("Erro na leitura %v. Usando sandbox\n", err)
 		n = 0
 	}
 	return n == 1
@@ -71,7 +71,6 @@ type site struct {
 //Config represents the configuration file
 type Config struct {
 	Sites []struct {
-		// Host is the local machine IP Address to bind the HTTP Server to
 		Name      string
 		Domain    string
 		SubDomain string
