@@ -1,37 +1,34 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"log"
 	"sync"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/manifoldco/promptui"
+	"github.com/spf13/viper"
 )
 
 type hcResult struct {
 	IsHealthy bool
 }
 
-type site struct {
-	Name      string
-	Domain    string
-	SubDomain string
-}
-
-func (s *site) url(sandbox bool) string {
-	if sandbox {
-		return fmt.Sprintf("https://%ssandbox.%s/healthcheck", s.SubDomain, s.Domain)
+func (s *site) url(prod bool) string {
+	if prod {
+		return fmt.Sprintf("https://%s.%s/healthcheck", s.SubDomain, s.Domain)
 	}
-	return fmt.Sprintf("https://%s.%s/healthcheck", s.SubDomain, s.Domain)
+	return fmt.Sprintf("https://%ssandbox.%s/healthcheck", s.SubDomain, s.Domain)
 }
 
-func check(wg *sync.WaitGroup, s site, sandbox bool) {
+func check(wg *sync.WaitGroup, s site, prod bool) {
 	defer wg.Done()
 
 	client := resty.New()
 	resp, err := client.R().
 		SetResult(&hcResult{}).
-		Get(s.url(sandbox))
+		Get(s.url(prod))
 
 	if err != nil {
 		fmt.Printf("Erro ao testar site  %v: %v\n", s.Name, err)
@@ -46,60 +43,73 @@ func check(wg *sync.WaitGroup, s site, sandbox bool) {
 	}
 }
 
-func askSandbox() bool {
+func determineIfProd(flagSbox, flagProd bool) bool {
 
+	if flagSbox || flagProd {
+		return flagProd && !flagSbox
+	}
 	prompt := promptui.Select{
-		Label: "Ambiente",
-		Items: []string{"Sandbox", "Produção"},
+		Label:     "Ambiente",
+		Items:     []string{"Sandbox", "Produção"},
+		IsVimMode: false,
 	}
 	n, _, err := prompt.Run()
+	log.Println(n)
 	if err != nil {
 		fmt.Printf("Erro na leitura %v. Usando sandbox\n", err)
-		n = 1
+		n = 0
 	}
-	fmt.Printf("N selecionado: %d\n", n)
-	sandbox := n == 0
-	return sandbox
+	return n == 1
+}
+
+type site struct {
+	Name      string
+	Domain    string
+	SubDomain string
+}
+
+//Config represents the configuration file
+type Config struct {
+	Sites []struct {
+		// Host is the local machine IP Address to bind the HTTP Server to
+		Name      string
+		Domain    string
+		SubDomain string
+	}
 }
 
 func main() {
 
-	sites := []site{
-		{
-			Name:      "Omni API",
-			Domain:    "cieloecommerce.cielo.com.br",
-			SubDomain: "omni",
-		},
-		{
-			Name:      "Omni Query API",
-			Domain:    "cieloecommerce.cielo.com.br",
-			SubDomain: "omniquery",
-		},
-		{
-			Name:      "Parameters Download API",
-			Domain:    "cieloecommerce.cielo.com.br",
-			SubDomain: "parametersdownload",
-		},
-		{
-			Name:      "Merchants API",
-			Domain:    "cieloecommerce.cielo.com.br",
-			SubDomain: "merchantapi",
-		},
-		{
-			Name:      "Onboarding API",
-			Domain:    "cieloecommerce.cielo.com.br",
-			SubDomain: "onboarding",
-		},
+	var err error
+
+	prodPtr := flag.Bool("prod", false, "Use production environment")
+	sboxPtr := flag.Bool("sbox", false, "Use sandbox environment")
+	flag.Parse()
+
+	viper.SetConfigName("config")
+	viper.SetConfigType("json")
+	viper.AddConfigPath(".")
+
+	if err = viper.ReadInConfig(); err != nil {
+		log.Fatalln(err)
 	}
 
-	sandbox := askSandbox()
+	var config Config
+	err = viper.Unmarshal(&config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sites := config.Sites
+
+	prod := determineIfProd(*sboxPtr, *prodPtr)
 
 	var wg sync.WaitGroup
 	for _, s := range sites {
 		wg.Add(1)
-		go check(&wg, s, sandbox)
+		go check(&wg, s, prod)
 	}
 
 	wg.Wait()
-	fmt.Println("-- That's all folks! --")
+	log.Println("-- That's all folks! --")
 }
