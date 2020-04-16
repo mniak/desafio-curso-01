@@ -1,0 +1,24 @@
+[[Sites]]
+Name = 'Omni API'
+Domain = 'cieloecommerce.cielo.com.br'
+SubDomain = 'omni'
+
+[[Sites]]
+Name = 'Omni Query API'
+Domain = 'cieloecommerce.cielo.com.br'
+SubDomain = 'omniquery'
+
+[[Sites]]
+Name = 'Parameters Download API'
+Domain = 'cieloecommerce.cielo.com.br'
+SubDomain = 'parametersdownload'
+
+[[Sites]]
+Name = 'Merchants API'
+Domain = 'cieloecommerce.cielo.com.br'
+SubDomain = 'merchantapi'
+
+[[Sites]]
+Name = 'Onboarding API'
+Domain = 'cieloecommerce.cielo.com.br'
+SubDomain = 'onboarding'

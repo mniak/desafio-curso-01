@@ -85,7 +85,7 @@ func main() {
 	flag.Parse()
 
 	viper.SetConfigName("config")
-	viper.SetConfigType("json")
+	viper.SetConfigType("toml")
 	viper.AddConfigPath(".")
 
 	if err = viper.ReadInConfig(); err != nil {
