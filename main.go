@@ -96,7 +96,7 @@ func main() {
 	var config Config
 	err = viper.Unmarshal(&config)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 
 	sites := config.Sites
