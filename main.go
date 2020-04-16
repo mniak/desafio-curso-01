@@ -54,7 +54,6 @@ func determineIfProd(flagSbox, flagProd bool) bool {
 		IsVimMode: false,
 	}
 	n, _, err := prompt.Run()
-	log.Println(n)
 	if err != nil {
 		log.Printf("Erro na leitura %v. Usando sandbox\n", err)
 		n = 0
