@@ -44,7 +44,7 @@ func readConfig() (config Config, err error) {
 	return
 }
 
-func useProd() bool {
+func isProd() bool {
 
 	prodPtr := flag.Bool("prod", false, "Use production environment")
 	sboxPtr := flag.Bool("sbox", false, "Use sandbox environment")

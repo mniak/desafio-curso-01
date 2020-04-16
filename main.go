@@ -40,7 +40,7 @@ func main() {
 	}
 
 	sites := config.Sites
-	prod := useProd()
+	prod := isProd()
 
 	var wg sync.WaitGroup
 	for _, s := range sites {
