@@ -105,6 +105,5 @@ func main() {
 		wg.Add(1)
 		go check(&wg, s, prod)
 	}
-
 	wg.Wait()
 }
