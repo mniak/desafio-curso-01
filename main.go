@@ -94,8 +94,7 @@ func main() {
 	}
 
 	var config Config
-	err = viper.Unmarshal(&config)
-	if err != nil {
+	if viper.Unmarshal(&config); err != nil {
 		log.Fatalln(err)
 	}
 
