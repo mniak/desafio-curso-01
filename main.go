@@ -98,7 +98,6 @@ func main() {
 	}
 
 	sites := config.Sites
-
 	prod := determineIfProd(*sboxPtr, *prodPtr)
 
 	var wg sync.WaitGroup
